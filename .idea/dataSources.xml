@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="1671947974">
+    <data-source source="LOCAL" name="PostgreSQL - alexbase@localhost" uuid="7b3e8cbe-a973-4762-9694-3302e0a9be00">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/alexbase</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="PostgreSQL - dc7ju0g35vm0jp@ec2-54-228-219-2.eu-west-1.compute.amazonaws.com" uuid="bdd0d087-5a0a-4c6e-ab51-339ab395d8ac">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://ec2-54-228-219-2.eu-west-1.compute.amazonaws.com:5432/dc7ju0g35vm0jp</jdbc-url>
+      <driver-properties>
+        <property name="ssl" value="true" />
+        <property name="sslfactory" value="org.postgresql.ssl.NonValidatingFactory" />
+      </driver-properties>
+    </data-source>
+  </component>
+</project>

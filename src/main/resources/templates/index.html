@@ -1,0 +1,192 @@
+<html ng-app="taskManagerApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Employees manager</title>
+    <!--<link href='./css/style.css' rel="stylesheet" type="text/css"/>-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+    <script src="./js/angular.min.js"></script>
+    <script type="text/javascript" src="./js/app.js"></script>
+    <link href="./css/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="./js/app.factory.js"></script>
+    <script src="./js/solo.table.js"></script>
+
+    <!-- Эти стили нужны для сортировки -->
+    <style type="text/css">
+        .solo-table-sort-asc > .solo-column-arrow {
+            position: relative;
+            top: 10px;
+            margin-left: 5px;
+            border-color: black transparent;
+            border-style: solid;
+            border-width: 5px 5px 0px 5px;
+            height: 0px;
+            width: 0px;
+        }
+
+        .solo-table-sort-desc > .solo-column-arrow {
+            position: relative;
+            top: -10px;
+            margin-left: 5px;
+            border-color: black transparent;
+            border-style: solid;
+            border-width: 0px 5px 5px 5px;
+            height: 0px;
+            width: 0px;
+        }
+
+        .solo-table-column-cursor {
+            cursor: pointer;
+        }
+
+        .main-div {
+            margin-left: 20px;
+            margin-right: 20px;
+            margin-top: 50px;
+        }
+
+        .box-size {
+            height: 30px;
+            width: 70px;
+        }
+    </style>
+
+</head>
+<body>
+
+
+<center>
+    <div ng-controller="employeeManagerController" class="main-div">
+
+        <div ng-show="toggle2">
+            <solo-table make-sortable="" items-on-page="10">
+
+                <button ng-click="toggle2 = !toggle2" style="position: absolute; right: 20px; top: 20px;" class="btn btn-default">Add New
+                    employee
+                </button>
+                <input placeholder="Filter by all columns" type="search" name="id" ng-model="filterModel"
+                       style="position: absolute; left: 20px; top: 20px; width: 140px" class="search-query"/>
+
+                <button style="position: absolute; left: 210px; top: 20px;"
+                        class="btn btn-default"
+                        onclick="document.getElementById('id').value='';
+                                 document.getElementById('search2').value='';
+                                 document.getElementById('search3').value='';
+                                 document.getElementById('search4').value='';
+                                 document.getElementById('search5').value='';"
+                        ng-click="filterModel='';
+                                  filterModelFirstName='';
+                                  filterModelLasrName='';
+                                  filterModelPosition='';
+                                  filterModelBranch=''">reset search
+                </button>
+
+                <!-- Показываем данные пейджинга: сколько всего страниц, на какой находимся, сколько записей во всей таблице -->
+                <div>Page {{pager.currentPage}} of {{pager.foundPages}}. Total items: {{pager.found}}</div>
+
+                <!-- Эта таблица обязательно  должна присутствовать в директиве solo-table, что, в общем то, очевидно. -->
+                <table class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <!-- У каждой колонки, которую мы хотим сортировать,
+                    нужно указать директиву sort-by='имя_поля_из_solo-table-data' -->
+                        <th sort-by='firstName' default-sort="asc">FirstName</th>
+                        <th sort-by='lastName'>LastName</th>
+                        <th>Position</th>
+                        <th sort-by='branch'>Branch</th>
+                        <th ></th>
+                    </tr>
+                    </thead>
+
+                    <thead>
+                    <tr>
+                        <th> <input id="search2" placeholder="filter" type="search"  ng-model="filterModelFirstName" class="search-query" style="width: 100px" ng-change="pager.currentPage=1"/></th>
+                        <th> <input id="search3" placeholder="filter" type="search"  ng-model="filterModelLasrName" class="search-query" style="width: 100px" ng-change="pager.currentPage=1"/></th>
+                        <th> <input id="search4" placeholder="filter" type="search"  ng-model="filterModelPosition" class="search-query" style="width: 100px" ng-change="pager.currentPage=1"/></th>
+                        <th> <input id="search5" placeholder="filter" type="search"  ng-model="filterModelBranch" class="search-query" style="width: 100px" ng-change="pager.currentPage=1"/></th>
+                        <th  style="width: 30px"> <input  type="button" value="sync" class="btn btn-default" ng-click="updateEmployees()"/></th>
+                    </tr>
+                    </thead>
+                    <!--
+
+                  В атрибуте контроллера "original" содержатся все данные, предоставленные провайдером solo-table-data.
+                В атрибуте "filtered" - данные из original, к которым применен фильтр
+
+                Для подветки найденной подстроки используется директива ng-bind-html-unsafe
+                -->
+                    <tr ng-repeat="item in filtered = (original | filter:filterModel) |
+                    filterByFields:filterModelFirstName:['firstName'] |
+                    filterByFields:filterModelLasrName:['lastName'] |
+                    filterByFields:filterModelPosition:['position'] |
+                    filterByFields:filterModelBranch:['branch'] ">
+                        <td>{{item.firstName}}</td>
+                        <td>{{item.lastName}}</td>
+                        <td>{{item.position}}</td>
+                        <td>{{item.branch}}</td>
+                        <td  style="width: 30px"><input id="{{item._links.self.href}}" type="button" value="delete"  ng-click="deleteEmployee(item._links.self.href)" class="btn btn-default"/></td>
+                    </tr>
+
+                </table>
+
+                <p>Show
+                    <select name="op" id="op" ng-model="op" ng-change="pager.setOnPage(op)" class="box-size" >
+                        <option  value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                    entries
+                </p>
+
+                <!-- Здесь реализован переход по страницам -->
+                <div>
+                    <ul class="pager">
+                        <li><a href="" solo-table-first-page="" ng-click="gotoFirstPage()">&laquo;</a></li>
+                        <li><a href="" ng-click="gotoPrevPage()"> &larr;prev</a></li>
+                        <li>  <span>{{pager.currentPage}}</span> </li>
+                        <li><a href="" ng-click="gotoNextPage()">next &rarr;</a></li>
+                        <li><a href="" ng-click="gotoLastPage()">&raquo;</a></li>
+                    </ul>
+                </div>
+            </solo-table>
+
+        </div>
+
+
+        <div ng-hide="toggle2">
+            <span>Add employee</span>
+            <button ng-click="toggle2 = !toggle2">Show All employees</button>
+            <p> </p>
+            <div>
+                <div class="employee">
+                    <table class="add-task">
+                        <tr>
+                            <td>first name:</td>
+                            <td><input type="text" ng-model="employeeFirstName"/></td>
+                        </tr>
+                        <tr>
+                            <td>last name:</td>
+                            <td><input type="text" ng-model="employeeLastName"/></td>
+                        </tr>
+                        <tr>
+                            <td>posision:</td>
+                            <td><input type="text" ng-model="employeePosition"/></td>
+                        </tr>
+                        <tr>
+                            <td>branch:</td>
+                            <td><input type="text" ng-model="employeeBranch"/></td>
+                        </tr>
+                        <tr>
+                            <td><br/>
+                                <button ng-click="addEmployee()">Add New employee</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</center>
+
+
+</body>
+</html>
